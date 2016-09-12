@@ -1,0 +1,12 @@
+applications:
+- path: .
+  memory: 512M
+  instances: 1
+  domain: mybluemix.net
+  name: vaiduq
+  host: vaiduq
+  disk_quota: 1024M
+  services:
+  - vaiduq-cloudantNoSQLDB
+  - Conversation-vv
+  - Personality Insights-fj
