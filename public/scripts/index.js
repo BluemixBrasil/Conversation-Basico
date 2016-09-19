@@ -1,308 +1,151 @@
-// index.js
+/**
+ * Copyright 2015 IBM Corp. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-var REST_DATA = 'api/favorites';
-var KEY_ENTER = 13;
-var defaultItems = [
-	
-];
+ /* global $:true */
 
-function loadItems(){
-	xhrGet(REST_DATA, function(data){
-		
-		//stop showing loading message
-		stopLoadingMessage();
-		
-		var receivedItems = data || [];
-		var items = [];
-		var i;
-		// Make sure the received items have correct format
-		for(i = 0; i < receivedItems.length; ++i){
-			var item = receivedItems[i];
-			if(item && 'id' in item){
-				items.push(item);
-			}
-		}
-		var hasItems = items.length;
-		if(!hasItems){
-			items = defaultItems;
-		}
-		for(i = 0; i < items.length; ++i){
-			addItem(items[i], !hasItems);
-		}
-		if(!hasItems){
-			var table = document.getElementById('notes');
-			var nodes = [];
-			for(i = 0; i < table.rows.length; ++i){
-				nodes.push(table.rows[i].firstChild.firstChild);
-			}
-			function save(){
-				if(nodes.length){
-					saveChange(nodes.shift(), save);
-				}
-			}
-			save();
-		}
-	}, function(err){
-		console.error(err);
-	});
-}
+ 'use strict';
 
-function startProgressIndicator(row)
-{	
-	row.innerHTML="<td class='content'>Uploading file... <img height=\"50\" width=\"50\" src=\"images/loading.gif\"></img></td>";	
-}
+var conversation_id, client_id;
+var inputText;
+var paramsGlobal = {};
 
-function removeProgressIndicator(row)
-{
-	row.innerHTML="<td class='content'>uploaded...</td>";
-}
+var context = {};
+var latestResponse;
+var count = 0;
+var params;
 
-function addNewRow(table)
-{
-	var newRow = document.createElement('tr');
-	table.appendChild(newRow);
-	return table.lastChild;
-}
+$(document).ready(function () {
 
-function uploadFile(node)
-{
-	
-	var file = node.previousSibling.files[0];
-	
-	//if file not selected, throw error
-	if(!file)
-	{
-		alert("File not selected for upload... \t\t\t\t \n\n - Choose a file to upload. \n - Then click on Upload button.");
-		return;
-	}
-	
-	var row = node.parentNode.parentNode;
-	
-	var form = new FormData();
-	form.append("file", file);
-	
-	var id = row.getAttribute('data-id');
-	
-	var queryParams = "id=" + (id==null?-1:id);
-	queryParams+= "&name="+row.firstChild.firstChild.value;
-	queryParams+="&value="+row.firstChild.nextSibling.firstChild.firstChild.firstChild.firstChild.firstChild.value;
-	
-	
-	var table = row.firstChild.nextSibling.firstChild;	
-	var newRow = addNewRow(table);	
-	
-	startProgressIndicator(newRow);
-	
-	xhrAttach(REST_DATA+"/attach?"+queryParams, form, function(item){	
-		console.log('Item id - ' + item.id);
-		console.log('attached: ', item);
-		row.setAttribute('data-id', item.id);
-		removeProgressIndicator(row);
-		setRowContent(item, row);
-	}, function(err){
-		console.error(err);
-	});
-	
-}
-
-var attachButton = "<br><input type=\"file\" name=\"file\" id=\"upload_file\"><input width=\"100\" type=\"submit\" value=\"Upload\" onClick='uploadFile(this)'>";
-
-function setRowContent(item, row)
-{
-		var innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)'>"+item.name+"</textarea></td><td class='content'><table border=\"0\">";	
-		
-		var valueTextArea = "<textarea id='valText' onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea>";		
-		if(item.value)
-		{
-			valueTextArea="<textarea id='valText' onkeydown='onKey(event)'>"+item.value+"</textarea>";
-		}
-		
-		innerHTML+="<tr border=\"0\" ><td class='content'>"+valueTextArea+"</td></tr>";
-		          
-		
-		var attachments = item.attachements;
-		if(attachments && attachments.length>0)
-		{
-			
-			for(var i = 0; i < attachments.length; ++i){
-				var attachment = attachments[i];
-				if(attachment.content_type.indexOf("image/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><img width=\"200\" src=\""+attachment.url+"\" onclick='window.open(\""+attachment.url+"\")'></img></td></tr>" ;
+var paramsConversation = {input: null, context: null};
+var $chatInput = $('.message_input');
 
 
-				} else if(attachment.content_type.indexOf("audio/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><AUDIO  height=\"50\" width=\"200\" src=\""+attachment.url+"\" controls></AUDIO></td></tr>" ;
 
+var converse = function(userText, context, guarda) {
+       // check if the user typed text or not
+    if (typeof(userText) !== undefined && $.trim(userText) !== '')
+      sendMessage(userText);
 
-				} else if(attachment.content_type.indexOf("video/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'>"+attachment.key+"<br><VIDEO  height=\"100\" width=\"200\" src=\""+attachment.url+"\" controls></VIDEO></td></tr>" ;
+    // build the conversation parameters
+    
+    params = { input : userText };
 
+    if (paramsConversation) {
+      params.context = paramsConversation.context;
+      console.log(paramsConversation);
+    }
 
-				} else if(attachment.content_type.indexOf("text/")==0 || attachment.content_type.indexOf("application/")==0)
-				{
-					innerHTML+= "<tr border=\"0\" ><td class='content'><a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.key+"</a></td></tr>" ;
+    $.post('/converse', params)
+    .done(function onSucess(answers){
+          $chatInput.val(''); // clear the text input
+          
+          if (paramsConversation){
+            paramsConversation = answers;
+            console.log(paramsConversation);
+          }
+          
 
-				} 
-			}	
-			
-		}
-		
-		row.innerHTML = innerHTML+"</table>"+attachButton+"</td><td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
-	
-}
+          if (userText == null){
+            $('.messages').append('<li><p>Watson: ' + answers.output.text + '</p></li>');
+            //talk('WATSON', answers.output.text);
+          }else{
+            if(answers.intents[0].confidence > 0.6 || answers.context.system.dialog_turn_counter > 2){
+              
+              if(answers.output.text.length > 1){
+                for(var i=0; i < answers.output.text.length; i++){
+                  $('.messages').append('<li><p>Watson: ' + answers.output.text[i] + '</p></li>')
+                  //talk('WATSON', answers.output.text[i]); 
+                }
+              
+              }else{
+                $('.messages').append('<li><p>Watson: ' + answers.output.text + '</p></li>');
+                //talk('WATSON', answers.output.text);
+              }
+              
+            }else{
+            $('.messages').append('<li><p>Watson: Desculpe, não sei responder</p></li>');                            
+            }
+          }
+       })
+    
+  }
 
-function addItem(item, isNew){
-	
-	var row = document.createElement('tr');
-	row.className = "tableRows";
-	var id = item && item.id;
-	if(id){
-		row.setAttribute('data-id', id);
-	}
-	
-	
-	
-	if(item) // if not a new row
-	{
-		setRowContent(item, row);
-	}
-	else //if new row
-	{
-		row.innerHTML = "<td class='content'><textarea id='nameText' onkeydown='onKey(event)' placeholder=\"Enter a title for your favourites...\"></textarea></td><td class='content'><table border=\"0\"><tr border=\"0\"><td class='content'><textarea id='valText'  onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea></td></tr></table>"+attachButton+"</td>" +
-		    "<td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
-	}
+$('#chat').keyup(function(event){
+    if(event.keyCode === 13) {
+      if (paramsConversation) {
+        context = paramsConversation.context;
+        console.log(context);
+      }
+      converse($(this).val(), context);
+    }
+  });
 
-	var table = document.getElementById('notes');
-	table.lastChild.appendChild(row);
-	row.isNew = !item || isNew;
-	
-	if(row.isNew)
-	{
-		var textarea = row.firstChild.firstChild;
-		textarea.focus();
-	}
-	
-}
+$('.send_message').click(function(){
+	var text = $('#chat').val();
+	console.log(text);
+	document.getElementById('chat').value = '';
+});
 
-function deleteItem(deleteBtnNode){
-	var row = deleteBtnNode.parentNode.parentNode;
-    var attribId = row.getAttribute('data-id');
-    if(attribId)
-	{
-		xhrDelete(REST_DATA + '?id=' + row.getAttribute('data-id'), function(){
-			row.parentNode.removeChild(row);
-		}, function(err){
-			console.error(err);
-		});
-	}
-	else if (attribId == null) {
-		row.parentNode.removeChild(row);
-	}
-}
+ // var talk = function(origin, text) {
+ //    paramsGlobal.content = text;    
 
-function onKey(evt){
-	
-	if(evt.keyCode == KEY_ENTER && !evt.shiftKey){
-		
-		evt.stopPropagation();
-		evt.preventDefault();
-		var nameV, valueV;
-		var row ; 		
-		
-		if(evt.target.id=="nameText")
-		{
-			row = evt.target.parentNode.parentNode;
-			nameV = evt.target.value;
-			valueV = row.firstChild.nextSibling.firstChild.firstChild.firstChild.firstChild.firstChild.value ;
-			
-		}
-		else
-		{
-			row = evt.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-			nameV = row.firstChild.firstChild.value;
-			valueV = evt.target.value;
-		}
-		
-		var data = {
-				name: nameV,
-				value: valueV
-			};			
-		
-			if(row.isNew){
-				delete row.isNew;
-				xhrPost(REST_DATA, data, function(item){
-					row.setAttribute('data-id', item.id);
-				}, function(err){
-					console.error(err);
-				});
-			}else{
-				data.id = row.getAttribute('data-id');
-				xhrPut(REST_DATA, data, function(){
-					console.log('updated: ', data);
-				}, function(err){
-					console.error(err);
-				});
-			}
-		
-	
-		if(row.nextSibling){
-			row.nextSibling.firstChild.firstChild.focus();
-		}else{
-			addItem();
-		}
-	}
-}
+ //    var $chatBox = $('.chat-box--item_' + origin).first().clone();
+ //    var $loading = $('.loader');
+ //    $chatBox.find('p').html($('<p/>').html(text));
+ //    $chatBox.insertBefore($loading);
+ //    setTimeout(function() {
+ //      $chatBox.removeClass('chat-box--item_HIDDEN');
+ //    }, 100);
+ //  };
 
-function saveChange(contentNode, callback){
-	var row = contentNode.parentNode.parentNode;
-	
-	var data = {
-		name: row.firstChild.firstChild.value,
-		value:row.firstChild.nextSibling.firstChild.value		
-	};
-	
-	if(row.isNew){
-		delete row.isNew;
-		xhrPost(REST_DATA, data, function(item){
-			row.setAttribute('data-id', item.id);
-			callback && callback();
-		}, function(err){
-			console.error(err);
-		});
-	}else{
-		data.id = row.getAttribute('data-id');
-		xhrPut(REST_DATA, data, function(){
-			console.log('updated: ', data);
-		}, function(err){
-			console.error(err);
-		});
-	}
-}
+  var Message = function (arg) {
+        this.text = arg.text, this.message_side = arg.message_side;
+        this.draw = function (_this) {
+            return function () {
+                var $message;
+                $message = $($('.message_template').clone().html());
+                $message.addClass(_this.message_side).find('.text').html(_this.text);
+                $('.messages').append($message);
+                return setTimeout(function () {
+                    return $message.addClass('appeared');
+                }, 0);
+            };
+        }(this);
+        return this;
+    };
+ var sendMessage = function (text) {            
+            var $messages, message;
+            if (text.trim() === '') {
+                return;
+            }
+            $('.message_input').val('');
+            $messages = $('.messages');
+            message_side = message_side === 'left' ? 'right' : 'left';
+            message = new Message({
+                text: text,
+                message_side: message_side
+            });
+            message.draw();
+            return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+        };
 
-function toggleServiceInfo(){
-	var node = document.getElementById('vcapservices');
-	node.style.display = node.style.display == 'none' ? '' : 'none';
-}
+// var submitMessage = function(text) {
+//     talk('YOU', text);
+//     scrollChatToBottom();
+//     clearInput();
+//   };
 
-function toggleAppInfo(){
-	var node = document.getElementById('appinfo');
-	node.style.display = node.style.display == 'none' ? '' : 'none';
-}
-
-
-function showLoadingMessage()
-{
-	document.getElementById('loadingImage').innerHTML = "Loading data "+"<img height=\"100\" width=\"100\" src=\"images/loading.gif\"></img>";
-}
-function stopLoadingMessage()
-{
-	document.getElementById('loadingImage').innerHTML = "";
-}
-
-showLoadingMessage();
-//updateServiceInfo();
-loadItems();
-
+});
