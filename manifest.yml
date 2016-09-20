@@ -9,4 +9,4 @@ applications:
   services:
   - vaiduq-cloudantNoSQLDB
   - Conversation-vv
-  - Personality Insights-fj
+  

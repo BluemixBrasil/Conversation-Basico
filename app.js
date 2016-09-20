@@ -44,10 +44,10 @@ var ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3');
 app.get('/', routes.index);
 
 var conversation = watson.conversation({
-  username:     '6f8b8ad7-c4b1-4c59-ac56-034744df982d',
-  password:     'BHiRNqxo8EXH',
-  version_date: '2016-07-11',
-  version:      'v1'
+  username:'6f8b8ad7-c4b1-4c59-ac56-034744df982d',
+  password:'BHiRNqxo8EXH',
+  version: 'v1',
+  version_date: '2016-07-11'
 });
 
 // var tone_analyzer = new ToneAnalyzerV3({
@@ -81,7 +81,7 @@ var conversation = watson.conversation({
 //       console.log(translation);
 // });
 
-var workspace = 'c3775be9-60cf-47e9-9212-7a376d5fdf34';
+var workspace = '271654e5-008e-486e-9242-c294be080bdc';
 
 
 app.post('/converse', function(req, res, next) {
@@ -100,17 +100,15 @@ app.post('/converse', function(req, res, next) {
     }
   }else{
     payload = {};
-  }
-
-
+      }
   conversation.message(payload, function(err, data){
     if ( err ) {
       console.log(err);
     }else{
 
-      if(!data.output.text[0]){
-        data.output.text[0] = resposta[data.intents[0].intent];
-      }
+      // if(!data.output.text[0]){
+      //   data.output.text[0] = resposta[data.intents[0].intent];
+      // }
       return res.json(data);
     }
   });

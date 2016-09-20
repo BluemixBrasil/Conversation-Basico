@@ -55,28 +55,27 @@ var converse = function(userText, context, guarda) {
           if (paramsConversation){
             paramsConversation = answers;
             console.log(paramsConversation);
-          }
-          
+          }         
 
           if (userText == null){
-            $('.messages').append('<li><p>Watson: ' + answers.output.text + '</p></li>');
+            sendMessage(answers.output.text);
             //talk('WATSON', answers.output.text);
           }else{
             if(answers.intents[0].confidence > 0.6 || answers.context.system.dialog_turn_counter > 2){
               
               if(answers.output.text.length > 1){
                 for(var i=0; i < answers.output.text.length; i++){
-                  $('.messages').append('<li><p>Watson: ' + answers.output.text[i] + '</p></li>')
+                  sendMessage(answers.output.text[i]);
                   //talk('WATSON', answers.output.text[i]); 
                 }
               
               }else{
-                $('.messages').append('<li><p>Watson: ' + answers.output.text + '</p></li>');
+                sendMessage(answers.output.text);
                 //talk('WATSON', answers.output.text);
               }
               
             }else{
-            $('.messages').append('<li><p>Watson: Desculpe, não sei responder</p></li>');                            
+            sendMessage("Desculpe, não sei responder.");                            
             }
           }
        })
@@ -96,22 +95,11 @@ $('#chat').keyup(function(event){
 $('.send_message').click(function(){
 	var text = $('#chat').val();
 	console.log(text);
-	document.getElementById('chat').value = '';
+  sendMessage(text);	
 });
 
- // var talk = function(origin, text) {
- //    paramsGlobal.content = text;    
 
- //    var $chatBox = $('.chat-box--item_' + origin).first().clone();
- //    var $loading = $('.loader');
- //    $chatBox.find('p').html($('<p/>').html(text));
- //    $chatBox.insertBefore($loading);
- //    setTimeout(function() {
- //      $chatBox.removeClass('chat-box--item_HIDDEN');
- //    }, 100);
- //  };
-
-  var Message = function (arg) {
+var Message = function (arg) {
         this.text = arg.text, this.message_side = arg.message_side;
         this.draw = function (_this) {
             return function () {
@@ -126,11 +114,15 @@ $('.send_message').click(function(){
         }(this);
         return this;
     };
- var sendMessage = function (text) {            
-            var $messages, message;
-            if (text.trim() === '') {
-                return;
-            }
+var getMessageText, message_side, sendMessage;
+        message_side = 'right';
+        getMessageText = function () {
+            var $message_input;
+            $message_input = $('.message_input');
+            return $message_input.val();
+        };
+var sendMessage = function (text) {            
+            var $messages, message;            
             $('.message_input').val('');
             $messages = $('.messages');
             message_side = message_side === 'left' ? 'right' : 'left';
@@ -139,13 +131,9 @@ $('.send_message').click(function(){
                 message_side: message_side
             });
             message.draw();
-            return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+            return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 1000);
         };
 
-// var submitMessage = function(text) {
-//     talk('YOU', text);
-//     scrollChatToBottom();
-//     clearInput();
-//   };
+converse();        
 
 });

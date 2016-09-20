@@ -3,20 +3,23 @@
 }
 
 body {
-	background-image:url('/images/paulista.jpeg');
-	background-repeat: no-repeat;
-	background-size: 1500px 800px;
-  background-color: #edeff2;
-  font-family: "Calibri", "Roboto", sans-serif;
+  background-image:url('/images/paulista.jpeg');  
+  background-repeat: no-repeat;
+background-position: center center;
+background-attachment: fixed;
+background-size: cover;
+  /*background-repeat: no-repeat;
+  background-size: contain;
+  background-size: 100%;*/  
+    background-color: #edeff2;
+    font-family: "Calibri", "Roboto", sans-serif;
 }
 
-.chat_window {
+.chat_window { /*Campo do meio, espaço vazio das mensagens*/
   position: absolute;
-  width: calc(100% - 20px);
-  max-width: 800px;
-  height: 500px;
+  width: 50%;
+  height: 50%;
   border-radius: 10px;
-  background-color: #fff;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
@@ -25,8 +28,10 @@ body {
   overflow: hidden;
 }
 
-.top_menu {
-  background-color: #fff;
+.top_menu { /*Campo com o título VaiDuQ */
+  background-color: #f8f8f8;
+  /*background-color: #000000;*/
+  color: #000000;
   width: 100%;
   padding: 20px 0 15px;
   box-shadow: 0 1px 30px rgba(0, 0, 0, 0.1);
@@ -63,7 +68,7 @@ body {
   list-style: none;
   padding: 20px 10px 0 10px;
   margin: 0;
-  height: 347px;
+  height: 67%;
   overflow: scroll;
 }
 .messages .message {
@@ -143,40 +148,43 @@ body {
   font-weight: 300;
 }
 
-.bottom_wrapper {
+.bottom_wrapper { /*Campo embaixo da barra horizontal contendo o campo de escrita e o botão Enviar*/
   position: relative;
   width: 100%;
-  background-color: #fff;
+  background-color: #f8f8f8;
   padding: 20px 20px;
   position: absolute;
   bottom: 0;
 }
-.bottom_wrapper .message_input_wrapper {
+.bottom_wrapper .message_input_wrapper { /*Campo contendo o campo de escrita redondo*/
   display: inline-block;
   height: 50px;
   border-radius: 25px;
-  border: 1px solid #bcbdc0;
+  border: 2px solid rgba(16, 93, 146, 1);
   width: calc(100% - 160px);
   position: relative;
   padding: 0 20px;
+  /*background-color: #000000;*/ 
 }
-.bottom_wrapper .message_input_wrapper .message_input {
+.bottom_wrapper .message_input_wrapper .message_input { /*Quadrado branco de fundo da mensagem*/
   border: none;
-  height: 100%;
+  height: 90%;
   box-sizing: border-box;
   width: calc(100% - 40px);
   position: absolute;
   outline-width: 0;
-  color: gray;
+  color: rgba(16, 93, 146, 1);
+  background-color: #f8f8f8;
+  top: 5%;
 }
-.bottom_wrapper .send_message {
+.bottom_wrapper .send_message { /*Botão Enviar*/
   width: 140px;
   height: 50px;
   display: inline-block;
   border-radius: 50px;
-  background-color: #a3d063;
-  border: 2px solid #a3d063;
-  color: #fff;
+  background-color: rgba(16, 93, 146, 1);
+  border: 2px solid rgba(16, 93, 146, 1);
+  color: rgb(255,255,255);
   cursor: pointer;
   transition: all 0.2s linear;
   text-align: center;
@@ -184,7 +192,7 @@ body {
 }
 .bottom_wrapper .send_message:hover {
   color: #a3d063;
-  background-color: #fff;
+  background-color: #f8f8f8;
 }
 .bottom_wrapper .send_message .text {
   font-size: 18px;
