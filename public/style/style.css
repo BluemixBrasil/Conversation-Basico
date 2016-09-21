@@ -71,6 +71,12 @@ background-size: cover;
   height: 67%;
   overflow: scroll;
 }
+.letter{
+  color: floralwhite;
+  position: relative;
+  text-align: center;
+  margin-top: 12px;
+}
 .messages .message {
   clear: both;
   overflow: hidden;
@@ -78,6 +84,7 @@ background-size: cover;
   transition: all 0.5s linear;
   opacity: 0;
 }
+
 .messages .message.left .avatar {
   background-color: #f5886e;
   float: left;

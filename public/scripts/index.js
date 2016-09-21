@@ -93,9 +93,11 @@ $('#chat').keyup(function(event){
   });
 
 $('.send_message').click(function(){
-	var text = $('#chat').val();
-	console.log(text);
-  sendMessage(text);	
+	if (paramsConversation) {
+        context = paramsConversation.context;
+        console.log(context);
+      }
+  converse($(this).val(), context);	
 });
 
 
@@ -106,6 +108,11 @@ var Message = function (arg) {
                 var $message;
                 $message = $($('.message_template').clone().html());
                 $message.addClass(_this.message_side).find('.text').html(_this.text);
+                if(_this.message_side === 'left'){
+                   $message.find('.avatar').append('<h1 class="letter">W</h1>');             
+                }else{
+                   $message.find('.avatar').append('<h1 class="letter">V</h1>'); 
+                }
                 $('.messages').append($message);
                 return setTimeout(function () {
                     return $message.addClass('appeared');
@@ -129,7 +136,7 @@ var sendMessage = function (text) {
             message = new Message({
                 text: text,
                 message_side: message_side
-            });
+            });            
             message.draw();
             return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 1000);
         };
