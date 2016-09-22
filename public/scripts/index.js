@@ -58,24 +58,24 @@ var converse = function(userText, context, guarda) {
           }         
 
           if (userText == null){
-            sendMessage(answers.output.text);
+            sendMessage(answers.output.text,'W');
             //talk('WATSON', answers.output.text);
           }else{
             if(answers.intents[0].confidence > 0.6 || answers.context.system.dialog_turn_counter > 2){
               
               if(answers.output.text.length > 1){
                 for(var i=0; i < answers.output.text.length; i++){
-                  sendMessage(answers.output.text[i]);
+                  sendMessage(answers.output.text[i],'W');
                   //talk('WATSON', answers.output.text[i]); 
                 }
               
               }else{
-                sendMessage(answers.output.text);
+                sendMessage(answers.output.text,'W');
                 //talk('WATSON', answers.output.text);
               }
               
             }else{
-            sendMessage("Desculpe, não sei responder.");                            
+            sendMessage("Desculpe, não sei responder.",'W');                            
             }
           }
        })
@@ -87,7 +87,8 @@ $('#chat').keyup(function(event){
       if (paramsConversation) {
         context = paramsConversation.context;
         console.log(context);
-      }
+        }
+        
       converse($(this).val(), context);
     }
   });
@@ -102,7 +103,7 @@ $('.send_message').click(function(){
 
 
 var Message = function (arg) {
-        this.text = arg.text, this.message_side = arg.message_side;
+        this.text = arg.text, this.message_side = arg.message_side, this.letter = arg.letter;
         this.draw = function (_this) {
             return function () {
                 var $message;
@@ -128,14 +129,19 @@ var getMessageText, message_side, sendMessage;
             $message_input = $('.message_input');
             return $message_input.val();
         };
-var sendMessage = function (text) {            
+var sendMessage = function (text, letter) {            
             var $messages, message;            
             $('.message_input').val('');
-            $messages = $('.messages');
-            message_side = message_side === 'left' ? 'right' : 'left';
+            $messages = $('.messages');            
+            if(letter === 'W'){
+              message_side = 'left';
+            }else{
+              message_side = 'right';
+            }
             message = new Message({
                 text: text,
-                message_side: message_side
+                message_side: message_side,
+                letter: letter
             });            
             message.draw();
             return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 1000);

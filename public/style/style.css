@@ -17,8 +17,8 @@ background-size: cover;
 
 .chat_window { /*Campo do meio, espaço vazio das mensagens*/
   position: absolute;
-  width: 50%;
-  height: 50%;
+  width: 70%;
+  height: 80%;
   border-radius: 10px;
   left: 50%;
   top: 50%;
