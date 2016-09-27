@@ -98,7 +98,7 @@ $('.send_message').click(function(){
         context = paramsConversation.context;
         console.log(context);
       }
-  converse($(this).val(), context);	
+  converse($('#chat').val(), context);	
 });
 
 
