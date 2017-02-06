@@ -34,53 +34,24 @@ app.use('/style', express.static(path.join(__dirname, '/views/style')));
 if ('development' == app.get('env')) {
 	app.use(errorHandler());
 }
-var cloudant = require('cloudant')('https://00875567-fecf-466b-8992-bc616a7a698a-bluemix:933c2d8d3d11473e408cc5ee864814a9834ab32b398ac22deeec663e5d49e09e@00875567-fecf-466b-8992-bc616a7a698a-bluemix.cloudant.com');
-cloudant = cloudant.db.use('vaidb');
+
 
 var watson = require('watson-developer-cloud');
 
-var ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3');
+
 
 app.get('/', routes.index);
 
+//credenciais de acesso ao serviço do Watson Conversation
 var conversation = watson.conversation({
-  username:'6f8b8ad7-c4b1-4c59-ac56-034744df982d',
-  password:'BHiRNqxo8EXH',
+  username:'6f8b8ad7-c4b1-4c59-ac56-034744df982d',//substitua pelo username do seu serviço
+  password:'BHiRNqxo8EXH',//substitua pelo password do seu serviço
   version: 'v1',
   version_date: '2016-07-11'
 });
 
-// var tone_analyzer = new ToneAnalyzerV3({
-//   username: 'a7369f85-8719-4912-aa66-2121a9271a4a',
-//   password: 'VzogJsqlxlJ6',
-//   version_date: '2016-05-19'
-// });
 
-// tone_analyzer.tone({ text: 'Greetings from Watson Developer Cloud!' },
-//   function(err, tone) {
-//     if (err)
-//       console.log(err);
-//     else
-//       console.log(JSON.stringify(tone, null, 2));
-// });
-
-
-// var language_translation = watson.language_translation({
-//   username: 'aea90495-46a8-4a07-b7ba-0d12fc96ab26',
-//   password: 'XyrwWZksVk7W',
-//   version: 'v2'
-// });
-// language_translation.translate({
-//     text: 'hello',
-//     source: 'pt',
-//     target: 'en'
-//   }, function(err, translation) {
-//     if (err)
-//       console.log(err)
-//     else
-//       console.log(translation);
-// });
-
+//Worskpace ID a ser mudado pelo seu Conversation
 var workspace = '271654e5-008e-486e-9242-c294be080bdc';
 
 
